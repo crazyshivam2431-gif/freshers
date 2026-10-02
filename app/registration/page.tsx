@@ -38,7 +38,7 @@ const courseOptions: Option[] = [
   { label: "B.TECH FOODTECH", value: "B.Tech FoodTech" },
   { label: "MSC FOODTECH", value: "MSc FoodTech" },
   { label: "MSC BIOTECH", value: "MSc Biotech" },
-  { label: "M.TECH BIOINFORMATICS", value: "M.Tech Bioinformatics" },
+  { label: "MSC BIOINFORMATICS", value: "MSc Bioinformatics" },
   { label: "M.TECH BIOTECH", value: "M.Tech Biotech" },
   { label: "OTHER", value: "Other" },
 ];
