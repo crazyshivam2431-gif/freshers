@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Aman Sharma",
+    "enrollmentNumber": "2024001234",
+    "contactNumber": "9876543210",
+    "preferredDate": "22 October",
+    "attendFresher": "Yes, I'm in!",
+    "performanceInterest": "Yes, I'd love to perform",
+    "performanceType": "",
+    "performanceDetails": "I will sing a duet at the fresher.",
+    "timestamp": "2026-10-01T13:26:43.286Z",
+    "submittedAt": "2026-10-01T13:26:43.286Z"
+  },
+  {
+    "name": "shivam bindal",
+    "enrollmentNumber": "a020204126022",
+    "contactNumber": "3465456165",
+    "preferredDate": "23 October",
+    "attendFresher": "Yes, I'm in!",
+    "performanceInterest": "Maybe / Depends",
+    "performanceType": "",
+    "performanceDetails": "",
+    "timestamp": "2026-10-01T13:33:33.314Z",
+    "submittedAt": "2026-10-01T13:33:33.314Z"
+  },
+  {
+    "name": "ewfewfgyuewgfyuhew",
+    "enrollmentNumber": "654651515516554",
+    "contactNumber": "7073415826",
+    "attendFresher": "Yes, I'm in!",
+    "studentType": "Day Scholar",
+    "performanceInterest": "Yes, I'd love to perform",
+    "timestamp": "2026-10-01T14:14:32.591Z",
+    "submittedAt": "2026-10-01T14:14:32.591Z"
+  },
+  {
+    "name": "wjdvehjhe",
+    "enrollmentNumber": "jfebvhewhbvhjewhu",
+    "contactNumber": "7073415826",
+    "attendFresher": "Yes, I'm in!",
+    "studentType": "Hosteler",
+    "performanceInterest": "Yes, I'd love to perform",
+    "timestamp": "2026-10-01T14:15:28.192Z",
+    "submittedAt": "2026-10-01T14:15:28.192Z"
+  },
+  {
+    "name": "SHIVAM",
+    "enrollmentNumber": "IUEWFGUEWHFIU",
+    "contactNumber": "7072415265",
+    "attendFresher": "Yes, I'm in!",
+    "studentType": "Day Scholar",
+    "performanceInterest": "Yes, I'd love to perform",
+    "timestamp": "2026-10-01T17:30:56.886Z",
+    "submittedAt": "2026-10-01T17:30:56.886Z"
+  }
+]
