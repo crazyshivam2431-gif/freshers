@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { google } from "googleapis";
 import fs from "fs";
 import path from "path";
 
@@ -26,67 +25,6 @@ const requiredFields = [
 const getLocalDataPath = () => path.join(process.cwd(), "data", "submissions.json");
 
 const normalize = (value: string) => value.trim().replace(/\s+/g, " ");
-
-async function saveToGoogleSheet(submission: SubmissionPayload) {
-  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetName = process.env.GOOGLE_SHEET_TAB_NAME || "Responses";
-
-  if (!serviceAccountEmail || !privateKey || !spreadsheetId) {
-    return { configured: false };
-  }
-
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: serviceAccountEmail,
-      private_key: privateKey.replace(/\\n/g, "\n"),
-    },
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const existing = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${sheetName}!A:Z`,
-  });
-
-  const rows = existing.data.values ?? [];
-  const duplicate = rows.some((row) => {
-    const enrollment = (row[2] ?? "").toString().trim().toLowerCase();
-    const contact = (row[3] ?? "").toString().trim();
-    return enrollment === submission.enrollmentNumber.trim().toLowerCase() && contact === submission.contactNumber.trim();
-  });
-
-  if (duplicate) {
-    return { configured: true, duplicate: true };
-  }
-
-  const timestamp = new Date().toISOString();
-  const row = [
-    timestamp,
-    submission.name,
-    submission.enrollmentNumber,
-    submission.contactNumber,
-    submission.attendFresher,
-    submission.studentType,
-    submission.course,
-    submission.performanceInterest,
-  ];
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: `${sheetName}!A:I`,
-    valueInputOption: "RAW",
-    insertDataOption: "INSERT_ROWS",
-    requestBody: {
-      values: [row],
-    },
-  });
-
-  return { configured: true, duplicate: false };
-}
 
 async function saveToLocalFile(submission: SubmissionPayload) {
   const filePath = getLocalDataPath();
@@ -163,22 +101,6 @@ export async function POST(request: Request) {
         { ok: false, message: "Please enter a valid 10-digit mobile number." },
         { status: 400 },
       );
-    }
-
-    const googleResult = await saveToGoogleSheet(sanitized);
-    if (googleResult.configured && googleResult.duplicate) {
-      return NextResponse.json(
-        {
-          ok: false,
-          duplicate: true,
-          message: "A response with these details already exists. If you need to make a change, please contact Shivam Bindal.",
-        },
-        { status: 409 },
-      );
-    }
-
-    if (googleResult.configured && !googleResult.duplicate) {
-      return NextResponse.json({ ok: true, mode: "google-sheets" }, { status: 201 });
     }
 
     const localResult = await saveToLocalFile(sanitized);
