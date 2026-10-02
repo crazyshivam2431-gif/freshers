@@ -15,8 +15,6 @@ import { useMemo, useState } from "react";
 type FormErrors = Partial<Record<keyof FormState, string>>;
 type Option = { label: string; value: string };
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaYssWaWfea55q3hAq8sU8Aka9_s9tZ3OmqExsyIGcLeQdLNXh1HPqQIie-xz5BsY/exec";
-
 const attendanceOptions: Option[] = [
   { label: "YES, I'M IN!", value: "Yes, I'm in!" },
   { label: "NO, I WON'T BE ABLE TO ATTEND", value: "No, I won't be able to attend." },
@@ -64,6 +62,7 @@ export default function RegistrationPage() {
   const [serverMessage, setServerMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
   const [hasStarted, setHasStarted] = useState(true);
 
   const summary = useMemo(
@@ -104,6 +103,7 @@ export default function RegistrationPage() {
 
   const resetFormState = () => {
     setForm(initialForm);
+    setSubmittedName("");
     setErrors({});
     setDuplicateMessage("");
     setServerMessage("");
@@ -119,7 +119,7 @@ export default function RegistrationPage() {
     if (!validateForm()) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch(APPS_SCRIPT_URL, {
+      const response = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -132,10 +132,11 @@ export default function RegistrationPage() {
       });
       const result = await response.json();
       if (!response.ok) {
-        if (result.duplicate) setDuplicateMessage(result.message || "A response with these details already exists.");
+        if (result.duplicate) setDuplicateMessage(result.message || "Aap pehle se register kar chuke hai is number se.");
         else setServerMessage(result.message || "Something went wrong while submitting your response. Please try again.");
         return;
       }
+      setSubmittedName(form.name.trim());
       setIsSubmitted(true);
       setForm(initialForm);
       setErrors({});
@@ -202,7 +203,7 @@ export default function RegistrationPage() {
           </form>
         </section>
       )) : (
-        <section className="success-section party-success"><div className="success-card glass-block"><div className="success-confetti" aria-hidden="true">{Array.from({ length: 30 }, (_, index) => <span key={index} style={{ ['--i' as string]: index, ['--x' as string]: `${(index % 10) * 11 - 55}px` }} />)}</div><div className="success-ribbon">YOU&apos;RE ON THE GUEST LIST</div><div className="success-icon-wrap"><div className="success-icon"><span>✓</span></div></div><h3>🎉 RESPONSE SUBMITTED!</h3><p className="success-lead">Your Fresher night just got brighter.</p><p>Your response has been recorded successfully.</p><p>Get ready to celebrate, connect and make memories! ✨</p><div className="button-row"><button type="button" className="secondary-btn" onClick={resetFormState}>REGISTER AGAIN</button><a className="secondary-btn" href="/">BACK TO HOME</a></div></div></section>
+        <section className="success-section party-success"><div className="success-card glass-block"><div className="success-confetti" aria-hidden="true">{Array.from({ length: 30 }, (_, index) => <span key={index} style={{ ['--i' as string]: index, ['--x' as string]: `${(index % 10) * 11 - 55}px` }} />)}</div><div className="success-ribbon">YOU&apos;RE ON THE GUEST LIST</div><div className="success-icon-wrap"><div className="success-icon"><span>✓</span></div></div><h3>🎉 RESPONSE SUBMITTED!</h3><p className="success-lead">{submittedName ? `Hi ${submittedName}!` : "Your Fresher night just got brighter."}</p><p>Your response has been recorded successfully.</p><p className="success-note">If any changes are required, contact your CRs or Shivam Bindal at 7073415826.</p><p>Get ready to celebrate, connect and make memories! ✨</p><div className="button-row"><button type="button" className="secondary-btn" onClick={resetFormState}>REGISTER AGAIN</button><a className="secondary-btn" href="/">BACK TO HOME</a></div></div></section>
       )}
     </main>
   );

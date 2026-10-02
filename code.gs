@@ -32,7 +32,7 @@ function doPost(e) {
       return jsonResponse({
         ok: false,
         duplicate: true,
-        message: "A response with these details already exists."
+        message: "Aap pehle se register kar chuke hai is number se."
       }, 409);
     }
 
@@ -138,6 +138,10 @@ function findDuplicate(sheet, enrollmentNumber, contactNumber) {
   for (let i = 1; i < values.length; i++) {
     const rowEnrollment = String(values[i][2] || "").trim().toLowerCase();
     const rowContact = String(values[i][3] || "").trim();
+
+    if (rowContact === contactNumber) {
+      return true;
+    }
 
     if (rowEnrollment === String(enrollmentNumber).trim().toLowerCase() && rowContact === contactNumber) {
       return true;

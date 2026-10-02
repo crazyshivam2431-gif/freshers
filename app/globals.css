@@ -622,10 +622,33 @@ textarea {
   text-align: center;
   padding: 2rem 1.2rem 2.4rem;
   overflow: hidden;
+  border-radius: 32px;
+  box-shadow: 0 24px 70px rgba(132, 92, 246, 0.22);
 }
 
 .party-success {
   min-height: 74vh;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.success-note {
+  display: inline-block;
+  max-width: 640px;
+  margin: 0.85rem auto 0.2rem;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 214, 102, 0.25);
+  color: #ffe8a8;
+  line-height: 1.7;
+  font-weight: 600;
 }
 
 .party-success .success-card {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaYssWaWfea55q3hAq8sU8Aka9_s9tZ3OmqExsyIGcLeQdLNXh1HPqQIie-xz5BsY/exec";
 
 type SubmissionPayload = {
   name: string;
@@ -22,47 +22,42 @@ const requiredFields = [
   "performanceInterest",
 ] as const;
 
-const getLocalDataPath = () => path.join(process.cwd(), "data", "submissions.json");
-
 const normalize = (value: string) => value.trim().replace(/\s+/g, " ");
 
-async function saveToLocalFile(submission: SubmissionPayload) {
-  const filePath = getLocalDataPath();
-  const folder = path.dirname(filePath);
-
-  if (!fs.existsSync(folder)) {
-    fs.mkdirSync(folder, { recursive: true });
-  }
-
-  let records: Array<{ timestamp: string; submittedAt: string } & SubmissionPayload> = [];
-
-  if (fs.existsSync(filePath)) {
-    try {
-      const content = fs.readFileSync(filePath, "utf-8");
-      records = JSON.parse(content) as Array<{ timestamp: string; submittedAt: string } & SubmissionPayload>;
-    } catch { 
-      records = [];
-    }
-  }
-
-  const duplicate = records.some(
-    (entry) =>
-      entry.enrollmentNumber.trim().toLowerCase() === submission.enrollmentNumber.trim().toLowerCase() &&
-      entry.contactNumber.trim() === submission.contactNumber.trim(),
-  );
-
-  if (duplicate) {
-    return { configured: false, duplicate: true };
-  }
-
-  records.push({
-    ...submission,
-    timestamp: new Date().toISOString(),
-    submittedAt: new Date().toISOString(),
+async function forwardToAppsScript(submission: SubmissionPayload) {
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(submission),
   });
 
-  fs.writeFileSync(filePath, JSON.stringify(records, null, 2));
-  return { configured: false, duplicate: false };
+  const text = await response.text();
+  let payload: any = null;
+
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      duplicate: payload?.duplicate === true,
+      message: payload?.message || "Something went wrong while saving the registration.",
+      status: response.status,
+    };
+  }
+
+  return {
+    ok: Boolean(payload?.ok ?? true),
+    duplicate: Boolean(payload?.duplicate),
+    message: payload?.message || "Registration submitted successfully.",
+    status: response.status,
+    courseSheet: payload?.courseSheet,
+  };
 }
 
 export async function POST(request: Request) {
@@ -103,19 +98,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const localResult = await saveToLocalFile(sanitized);
-    if (localResult.duplicate) {
+    const appsScriptResult = await forwardToAppsScript(sanitized);
+
+    if (appsScriptResult.duplicate) {
       return NextResponse.json(
         {
           ok: false,
           duplicate: true,
-          message: "A response with these details already exists. If you need to make a change, please contact Shivam Bindal.",
+          message: appsScriptResult.message || "Aap pehle se register kar chuke hai is number se.",
         },
         { status: 409 },
       );
     }
 
-    return NextResponse.json({ ok: true, mode: "local-demo" }, { status: 201 });
+    if (!appsScriptResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: appsScriptResult.message || "Something went wrong while submitting your response. Please try again.",
+        },
+        { status: appsScriptResult.status || 500 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, mode: "google-script", courseSheet: appsScriptResult.courseSheet }, { status: 201 });
   } catch (error) {
     console.error("Submission failed:", error);
     return NextResponse.json(
