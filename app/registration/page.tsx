@@ -15,6 +15,8 @@ import { useMemo, useState } from "react";
 type FormErrors = Partial<Record<keyof FormState, string>>;
 type Option = { label: string; value: string };
 
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaYssWaWfea55q3hAq8sU8Aka9_s9tZ3OmqExsyIGcLeQdLNXh1HPqQIie-xz5BsY/exec";
+
 const attendanceOptions: Option[] = [
   { label: "YES, I'M IN!", value: "Yes, I'm in!" },
   { label: "NO, I WON'T BE ABLE TO ATTEND", value: "No, I won't be able to attend." },
@@ -117,7 +119,7 @@ export default function RegistrationPage() {
     if (!validateForm()) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/submit", {
+      const response = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
